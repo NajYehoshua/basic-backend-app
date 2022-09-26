@@ -1,39 +1,23 @@
 const express = require("express");
+const {
+  getPersonsHandler,
+  postPersonHandler,
+  patchPersonHandler,
+  deletePersonHandler,
+} = require("../controller/personHandler");
 const Person = require("../model/person");
 const router = express.Router();
 
 // ! GET request
-router.get("/", async (req, res) => {
-  //! Get all document
-  const persons = await Person.find();
-
-  //! Respond to client with result
-  res.json({ results: persons });
-});
+router.get("/", getPersonsHandler);
 
 // ! POST request
-router.post("/create", async (req, res) => {
-  //! Get user data
-  const { name, birthYear, age } = req.body;
+router.post("/create", postPersonHandler);
 
-  //! Create new Person model
-  const newPerson = new Person({ name, birthYear, age });
-
-  //! Save to Database
-  const response = await newPerson.save();
-
-  //! Respond to client with result
-  res.json(response);
-});
-
-// ! PUT request
-router.put("/update", (req, res) => {
-  res.send({ msg: "Update current item!" });
-});
+// ! PATCH request
+router.patch("/update/:id", patchPersonHandler);
 
 // ! DELETE request
-router.delete("/delete", (req, res) => {
-  res.send({ msg: "Delete current item!" });
-});
+router.delete("/delete/:id", deletePersonHandler);
 
 module.exports = router;
