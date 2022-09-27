@@ -1,31 +1,30 @@
 const Person = require("../model/person");
+const { createCustomError } = require("../error/customError");
+const asyncHandler = require("../middlewares/asyncHandler");
 
 //! GET Handler
-const getPersonsHandler = async (req, res) => {
+const getPersonsHandler = asyncHandler(async (req, res) => {
   //! Get all document
   const persons = await Person.find();
 
   //! Give a Response to client
-  res.json({ results: persons });
-};
+  res.status(200).json({ results: persons });
+});
 
 //! POST Handler
-const postPersonHandler = async (req, res) => {
+const postPersonHandler = asyncHandler(async (req, res) => {
   //! Get user data
   const { name, birthYear, age } = req.body;
 
   //! Create new Person model
-  const newPerson = new Person({ name, birthYear, age });
-
-  //! Save to Database
-  const response = await newPerson.save();
+  const newPerson = await Person.create({ name, birthYear, age });
 
   //! Give a Response to client
-  res.json(response);
-};
+  res.status(200).json(newPerson);
+});
 
 //! PATCH Handler
-const patchPersonHandler = async (req, res) => {
+const patchPersonHandler = asyncHandler(async (req, res) => {
   //! Get document id
   const { id } = req.params;
 
@@ -40,21 +39,31 @@ const patchPersonHandler = async (req, res) => {
   //! Find and update document
   const response = await Person.findByIdAndUpdate(id, { name, age }, options);
 
+  //! Check response from db
+  if (!response) {
+    return next(createCustomError(`No person with ID of ${id} exist`, 404));
+  }
+
   //! Give a Response to client
-  res.send({ response });
-};
+  res.status(200).send({ response });
+});
 
 //! DELETE Handler
-const deletePersonHandler = async (req, res) => {
+const deletePersonHandler = asyncHandler(async (req, res, next) => {
   //! Get the document id
   const { id } = req.params;
 
   //! Delete documents from db
   const response = await Person.findByIdAndDelete(id);
 
+  //! Check response from db
+  if (!response) {
+    return next(createCustomError(`No person with ID of ${id} exist`, 404));
+  }
+
   //! Give a Response to client
-  res.send({ status: "Success", result: response });
-};
+  res.status(200).send({ status: "Success", result: response });
+});
 
 module.exports = {
   getPersonsHandler,
