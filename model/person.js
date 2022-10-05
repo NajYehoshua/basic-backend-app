@@ -17,6 +17,13 @@ const personSchema = new mongoose.Schema({
   },
 });
 
+//! Mongoose middelware
+personSchema.pre("save", (next) => {
+  console.log("Pre middleware", this);
+
+  next();
+});
+
 //! compile schema to model
 const Person = new mongoose.model("Person", personSchema);
 
